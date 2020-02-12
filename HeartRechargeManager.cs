@@ -164,15 +164,39 @@ public class HeartRechargeManager : MonoBehaviour
         var timeDifferenceInSec = (int)((DateTime.Now.ToLocalTime() - m_AppQuitTime).TotalSeconds);
         Debug.Log("TimeDifference In Sec :" + timeDifferenceInSec + "s");
 
-        timeDifferenceInSec = PlayerPrefs.GetInt("RemainTime") - timeDifferenceInSec;
-        if (timeDifferenceInSec < 0)
-            timeDifferenceInSec = Mathf.Abs(timeDifferenceInSec);
+        int origintimeDifferenceInSec = timeDifferenceInSec;
 
-        var heartToAdd = timeDifferenceInSec / HeartRechargeInterval;
-        Debug.Log("Heart to add : " + heartToAdd);
-        var remainTime = timeDifferenceInSec % HeartRechargeInterval;
-        Debug.Log("RemainTime : " + remainTime);
-        m_HeartAmount += heartToAdd;
+        int remainTime = 0;
+        int heartToAdd;
+        if (timeDifferenceInSec > 0)
+        {
+
+            timeDifferenceInSec = PlayerPrefs.GetInt("RemainTime") - timeDifferenceInSec;
+
+            if (timeDifferenceInSec <= 0)
+            {
+                m_HeartAmount ++;
+                timeDifferenceInSec = Mathf.Abs(timeDifferenceInSec);
+                heartToAdd = timeDifferenceInSec / HeartRechargeInterval;
+                Debug.Log("Heart to add : " + heartToAdd);
+                if (heartToAdd == 0)
+                    remainTime = HeartRechargeInterval - timeDifferenceInSec;
+                else
+                    remainTime = HeartRechargeInterval - (timeDifferenceInSec % HeartRechargeInterval);
+            }
+            else
+            {
+                heartToAdd = timeDifferenceInSec / HeartRechargeInterval;
+                Debug.Log("Heart to add : " + heartToAdd);
+                if (heartToAdd == 0)
+                    remainTime = PlayerPrefs.GetInt("RemainTime") - origintimeDifferenceInSec;
+            }
+            Debug.Log("RemainTime : " + remainTime);
+            m_HeartAmount  += heartToAdd;
+        }
+        else if (timeDifferenceInSec < 0)
+            Debug.Log("선생님? 시간여행자이십니까?");
+
         if (m_HeartAmount >= MAX_HEART)
         {
             m_HeartAmount = MAX_HEART;
